@@ -1,0 +1,23 @@
+<configuration>
+    <!-- always a good activate OnConsoleStatusListener -->
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%h %l %u %user %date "%r" %s %b</pattern>
+        </encoder>
+    </appender>
+
+    <appender-ref ref="STDOUT" />
+
+    <appender name="lofidrox" class="ch.qos.logback.core.FileAppender">
+        <file>/opt/lofidrox/logs/lofidrox.log</file>
+        <encoder>
+            <pattern>%d %-5p: [%c] %m %rEx{3} %n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="ERROR">
+        <appender-ref ref="lofidrox" />
+    </root>
+</configuration>

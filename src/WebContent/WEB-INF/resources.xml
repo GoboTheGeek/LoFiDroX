@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<resources>
+    <Resource id="lofidroxDB" type="javax.sql.DataSource">
+        UserName LOFIDROX
+        Password XXXXX
+        jtaManaged false
+        JdbcDriver org.hsqldb.jdbcDriver
+        JdbcUrl jdbc:hsqldb:hsql://localhost:9001/lofidrox
+    </Resource>
+</resources>

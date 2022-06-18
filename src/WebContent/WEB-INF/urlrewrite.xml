@@ -1,0 +1,16 @@
+<urlrewrite>
+	<rule>
+		<note>
+			Transfer all urls starting with /spa/ to index page so client can route itselfs correctly
+		</note>
+		<from>/spa/(.*)</from>
+		<to type="redirect">%{context-path}/index.html?page=/lofidrox/spa/$1</to>
+	</rule>
+	<rule>
+		<note>
+			Transfer all urls starting with /img/ to folder /project/final/images
+		</note>
+		<from>/img/(.*)</from>
+		<to type="redirect">%{context-path}/project/final/images/$1</to>
+	</rule>
+</urlrewrite>

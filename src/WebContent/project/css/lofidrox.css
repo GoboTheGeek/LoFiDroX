@@ -1,0 +1,202 @@
+@font-face {
+    font-family: 'Grape Nuts';
+    src: url('../fonts/GrapeNuts-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Black.ttf') format('truetype'),
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-BlackItalic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-BoldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-ExtraBoldItalic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-ExtraLight.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-ExtraLightItalic.ttf') format('truetype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Raleway', sans-serif;
+    src: url('../fonts/Raleway-ThinItalic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+.lfd-logo {
+    border: 1px solid #FFFFFF;
+    border-radius: 50px;
+    width: 25%;
+    height: 25%;
+}
+
+.lfd-title {
+    font-family: 'Grape Nuts', cursive !important;
+    font-size: 2rem !important;
+}
+
+.lfd-app-name {
+    font-family: 'Grape Nuts', cursive !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.lfd-nav-bar {
+    border: 0px solid #FFFFFF;
+    border-bottom: 1px solid #0071BC;
+}
+
+.lfd-gradient-colors {
+    background: rgb(0,113,188);
+    background: linear-gradient(135deg, rgba(0,113,188,1) 0%, rgba(255,136,0,1) 100%);
+}
+
+@media (min-width: 768px) {
+    .lfd-gradient-form {
+        height: 90vh !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .lfd-gradient-colors {
+        border-top-right-radius: .3rem;
+        border-bottom-right-radius: .3rem;
+    }
+}
+
+.lfd-files-header {
+    border-bottom: 1px solid #FF8800;
+}
+
+.lfd-files-list {
+    min-height: 250px;
+    margin-top: 0.5rem;
+}
+
+.lfd-files-list .lfd-files-list-content {
+    min-height: 250px;
+    margin-top: 0.5rem;
+}
+
+.lfd-files-list-data {
+    font-size: 0.85rem;
+}
+
+.lfd-row-color-1 {
+    background-color: hsl(0, 0%, 71%);
+}
+
+.lfd-image-illu {
+    width: 75%;
+    height: 75%;
+    margin: auto;
+}
+
