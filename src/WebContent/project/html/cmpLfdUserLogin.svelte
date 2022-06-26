@@ -6,6 +6,7 @@
 <script>
     import { navigate } from "svelte-routing";
     import { onMount } from 'svelte';
+    import * as yup from 'yup';
     import GtgUtilsTools from '../../frameworks/gtg-svelte/gtg-utils-tooling.js';
     import GtgUtilsPassword from '../../frameworks/gtg-svelte/gtg-utils-password.js';
     import GtgUtilsWeb from '../../frameworks/gtg-svelte/gtg-utils-web.js';
@@ -16,21 +17,25 @@
 
     let fields = { fieldUsr: null, fieldPwd: null };
     let values = { username: null, password: null };
-    let validation = { user: true, pwd: true, login: true };
+    let validation = { login: true };
+    let errorMessages = { username: null, pwd: null };
 
-    function checkUsername() {
-        return (!GtgUtilsTools.isNull(values.username) && (4 <= values.username.length));
-    };
+    let schemaValidation = yup.object().shape( {
+        username: yup.string().nullable().required('You must enter a username').min(4, 'Username must contains at least ${min} letters'),
+        pwd: yup.string().nullable().required('You must enter a password').
+            min(10, 'Password must contains at least ${min} caracters').
+            max(256, 'Passqord must contains up to ${max} caracters long').
+            test('pwd-strength', 'Password must contains uppercase letter, lowercase letter, digit, special caracter',
+            function(value) {
+                return GtgUtilsPassword.checkStrongPwd(value);
+            } )
+    } );
 
-    function checkPassword() {
-        return GtgUtilsPassword.checkStrongPwd(values.password);
-    };
-
-    function login() {
-        validation.login = true;
-        validation.user = checkUsername();
-        validation.pwd = checkPassword();
-        if (validation.user && validation.pwd) {
+    async function login() {
+        try {
+            validation.login = true;
+            errorMessages = { username: null, pwd: null };
+            await schemaValidation.validate( { 'username': values.username, 'pwd': values.password }, { abortEarly: false } );
             GtgUtilsTools.setLocalValue(LfdLocalStore.field_username, values.username);
             GtgUtilsWeb.postJson(LfdUrls.crud_user_login, { 'username': values.username, 'pwd': values.password }, function(data) {
                 if (!GtgUtilsTools.isNull(data) && !GtgUtilsTools.isNull(data.logged) && data.logged) {
@@ -44,6 +49,8 @@
                     GtgUtilsWeb.route(LfdUrls.spa_error);
                 }
             } );
+        } catch (errors) {
+            errorMessages = GtgUtilsTools.turnYupErrorsToArray(errors);
         }
     };
 
@@ -79,16 +86,14 @@
                                         <p>Please login to your account</p>
                                         <div class="form-outline mb-4">
                                             <input class="input form-control form-control-sm" tabindex="1" type="text" name="fieldUsr" placeholder="Enter your username" bind:value={values.username} bind:this={fields.fieldUsr}>
-                                            {#if !validation.user }
-                                            <p class="bg-danger text-white px-1 py-1">Username must contains at least 4 letters</p>
+                                            {#if errorMessages.username }
+                                            <p class="bg-danger text-white px-1 py-1">{errorMessages.username}</p>
                                             {/if}
                                         </div>
                                         <div class="form-outline mb-4">
                                             <input class="input form-control form-control-sm" tabindex="2" type="password" name="fieldPwd" placeholder="Enter your password" bind:value={values.password} bind:this={fields.fieldPwd}>
-                                            {#if !validation.pwd }
-                                            <p class="bg-danger text-white px-1 py-1">
-                                                Password must contains uppercase letter, lowercase letter, digit, special caracter and must be 10 to 256 caracters long.
-                                            </p>
+                                            {#if errorMessages.pwd }
+                                            <p class="bg-danger text-white px-1 py-1">{errorMessages.pwd}</p>
                                             {/if}
                                         </div>
                                         {#if !validation.login }

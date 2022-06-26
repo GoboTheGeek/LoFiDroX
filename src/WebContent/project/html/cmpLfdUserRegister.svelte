@@ -5,6 +5,7 @@
 
 <script>
     import { onMount } from 'svelte';
+    import * as yup from 'yup';
     import LfdUrls from '../js/lfdUrlManager.js';
     import LfdStore from '../js/lfdLocalStore.js';
     import GtgUtilsTools from '../../frameworks/gtg-svelte/gtg-utils-tooling.js';
@@ -13,19 +14,36 @@
 
     let fields = { fUsername: null };
     let values = { username: null, password: null, passwordConf: null };
-    let validation = { user: true, pwd: true, pwdCnf: true, registered: true };
+    let validation = { registered: true };
+    let errorMessages = { username: null, pwd: null, pwdCnf: null };
+
+    let schemaValidation = yup.object().shape( {
+        username: yup.string().nullable().required('You must enter a username').min(4, 'Username must contains at least ${min} letters'),
+        pwd: yup.string().nullable().required('You must enter a password').
+            min(10, 'Password must contains at least ${min} caracters').
+            max(256, 'Passqord must contains up to ${max} caracters long').
+            test('pwd-strength', 'Password must contains uppercase letter, lowercase letter, digit, special caracter',
+            function(value) {
+                return GtgUtilsPassword.checkStrongPwd(value);
+            } ),
+        pwdCnf: yup.string().nullable().required('You must confirm password').
+            min(10, 'Password must contains at least ${min} caracters').
+            max(256, 'Passqord must contains up to ${max} caracters long').
+            test('pwd-egality', 'Passwords are not identical',
+            function(value) {
+                return GtgUtilsPassword.checkEquality(values.password, value);
+            } )
+    } );
 
     function goLogin() {
         GtgUtilsWeb.route(LfdUrls.spa_user_login);
     };
 
-    function register() {
-        validation.registered = true;
-        validation.user = (!GtgUtilsTools.isNull(values.username) && (4 <= values.username.length));
-        validation.pwd = GtgUtilsPassword.checkStrongPwd(values.password);
-        validation.pwdCnf = GtgUtilsPassword.checkEquality(values.password, values.passwordConf);
-
-        if (validation.user && validation.pwd && validation.pwdCnf) {
+    async function register() {
+        try {
+            validation.registered = true;
+            errorMessages = { username: null, pwd: null, pwdCnf: null };
+            await schemaValidation.validate( { 'username': values.username, 'pwd': values.password, 'pwdCnf': values.passwordConf }, { abortEarly: false } );
             GtgUtilsWeb.postJson(LfdUrls.crud_user_register, { username: values.username, pwd: values.password }, function(data) {
                 if ((null != data) && data.registered) {
                     window.localStorage.setItem(LfdStore.field_username, data.username);
@@ -38,6 +56,8 @@
                     GtgUtilsWeb.route(LfdUrls.spa_error);
                 }
             } );
+        } catch (errors) {
+            errorMessages = GtgUtilsTools.turnYupErrorsToArray(errors);
         }
     };
 
@@ -63,24 +83,20 @@
                                         <p>Please create your account</p>
                                         <div class="form-outline mb-4">
                                             <input class="input form-control form-control-sm" tabindex="1" type="text" placeholder="Enter your name" id="fUsername" bind:value={values.username} bind:this={fields.fUsername}>
-                                            {#if !validation.user }
-                                            <p class="bg-danger text-white px-1 py-1">Username must contains at least 4 letters</p>
+                                            {#if errorMessages.username }
+                                                <p class="bg-danger text-white px-1 py-1">{errorMessages.username}</p>
                                             {/if}
                                         </div>
                                         <div class="form-outline mb-4">
                                             <input class="input form-control form-control-sm" tabindex="2" type="password" placeholder="Enter your password" id="fPassword" bind:value="{values.password}">
-                                            {#if !validation.pwd}
-                                            <p class="bg-danger text-white px-1 py-1">
-                                                Password must contains uppercase letter, lowercase letter, digit, special caracter and must be 10 to 256 caracters long.
-                                            </p>
+                                            {#if errorMessages.pwd}
+                                                <p class="bg-danger text-white px-1 py-1">{errorMessages.pwd}</p>
                                             {/if}
                                         </div>
                                         <div class="form-outline mb-4">
                                             <input class="input form-control form-control-sm" tabindex="3" type="password" placeholder="Confirm your password" id="fPasswordCnf" bind:value="{values.passwordConf}">
-                                            {#if !validation.pwdCnf}
-                                            <p class="bg-danger text-white px-1 py-1">
-                                                Passwords are not identical
-                                            </p>
+                                            {#if errorMessages.pwdCnf}
+                                                <p class="bg-danger text-white px-1 py-1">{errorMessages.pwdCnf}</p>
                                             {/if}
                                         </div>
                                         {#if !validation.registered }
@@ -102,7 +118,7 @@
                                     <img src="/lofidrox/img/user_register_register.png" class="lfd-image-illu" alt="Register">
                                 {:else}
                                     <img src="/lofidrox/img/user_register_error.png" class="lfd-image-illu" alt="Error">
-                                    {/if}
+                                {/if}
                             </div>
                         </div>
                     </div>
