@@ -5,6 +5,7 @@ import ch.gobothegeek.lofidrox.model.entities.FileDescriptor;
 import ch.gobothegeek.lofidrox.model.entities.FileRecipient;
 import ch.gobothegeek.lofidrox.model.json.file.JsonFileDownload;
 import ch.gobothegeek.lofidrox.repositories.FileDescriptorRepository;
+import ch.gobothegeek.lofidrox.repositories.FileRecipientRepository;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.deltaspike.core.api.config.ConfigResolver;
@@ -27,14 +28,13 @@ public class FileDescriptorService {
 
 	@Inject private FileDescriptorRepository fileDescriptorRepository;
 	@Inject private FileRecipientService fileRecipientService;
+	@Inject private FileRecipientRepository fileRecipientRepository;
 
 	@Transactional(Transactional.TxType.REQUIRED)
-	public Integer addFile(String filename, String userSrc) {
-		FileDescriptor file;
+	public FileDescriptor addFile(String filename, String userSrc) {
 
 		if ((null != filename) && (null != userSrc)) {
-			file = this.fileDescriptorRepository.createFile(filename, null, userSrc, null);
-			return (null != file? file.getId() : null);
+			return this.fileDescriptorRepository.createFile(filename, null, userSrc, null);
 		}
 		return null;
 	}
@@ -42,7 +42,7 @@ public class FileDescriptorService {
 	// upload a file to multiples receivers
 	@Transactional(Transactional.TxType.REQUIRED)
 	public boolean uploadFileToUsers(String[] users, String filename, String base64Data, String userPost) {
-		Integer fileId;
+		FileDescriptor file;
 		String folder;
 		File fileOut;
 		String base64Head;
@@ -50,7 +50,7 @@ public class FileDescriptorService {
 
 		if ((null != users) && (0 < users.length) && (null != filename) && (null != base64Data)) {
 			// prepare upload: add file name to database
-			fileId = this.addFile(filename, userPost);
+			file = this.addFile(filename, userPost);
 			try {
 				// compute destination folder name
 				folder = ConfigResolver.getPropertyValue("application.storage.base");
@@ -65,16 +65,16 @@ public class FileDescriptorService {
 				content = Base64.decodeBase64(base64Data.substring(base64Data.indexOf(BASE64_TAG) + BASE64_TAG.length()));
 				FileUtils.writeByteArrayToFile(fileOut, content);
 				// update file in DB
-				if (!this.updateFilePathAndType(fileId, fileOut.getAbsolutePath(), base64Head)) {
-					logger.error("Unable to update file [" + fileId + "]");
-					throw new LfdException("Unable to update file [" + fileId + "]");
+				if (!this.updateFilePathAndType(file.getId(), fileOut.getAbsolutePath(), base64Head)) {
+					logger.error("Unable to update file [" + file.getId() + "]");
+					throw new LfdException("Unable to update file [" + file.getId() + "]");
 				}
-				return (null != this.fileRecipientService.addRecipients(fileId, users));
+				return (null != this.fileRecipientService.addRecipients(file.getId(), users));
 			} catch (Exception e) {
 				System.out.println("Unable to write file [" + filename + "]");
 				e.printStackTrace();
 				// delete file from DB
-				this.deleteFile(fileId);
+				this.deleteFile(file);
 			}
 		}
 		logger.error("Missing parameters to upload file [users: " + ((null != users) && (0 < users.length)) + "], [filename=" + (null != filename) + "], " +
@@ -94,10 +94,10 @@ public class FileDescriptorService {
 	}
 
 	@Transactional(Transactional.TxType.REQUIRED)
-	public void deleteFile(Integer fileId) {
-		if (null != fileId) {
-			//this.fileRecipientService.deleteRecipients(fileId);
-			this.fileDescriptorRepository.deleteFile(fileId);
+	public void deleteFile(FileDescriptor file) {
+		if (null != file) {
+			FileUtils.deleteQuietly(new File(file.getPath()));
+			this.fileDescriptorRepository.deleteFile(file.getId());
 		}
 	}
 
@@ -138,6 +138,26 @@ public class FileDescriptorService {
 
 	@Transactional(Transactional.TxType.REQUIRED)
 	public int deleteFiles(List<Integer> files, String user) {
-		return this.fileDescriptorRepository.deleteFilesForSender(files, user);
+		List<FileDescriptor> filesDesc;
+		List< FileRecipient> recips;
+
+		if ((null != files) && (0 < files.size()) && (null != user)) {
+			// find files by id
+			filesDesc = this.fileDescriptorRepository.findByIdIn(files);
+			if (filesDesc.size() == files.size()) { // we got all required files
+				for (FileDescriptor fileDesc : filesDesc) {
+					// break link between recipient and file
+					this.fileRecipientRepository.deleteLink(user, fileDesc.getId());
+					// check if a user hold this file
+					recips = this.fileRecipientRepository.findAnyByFileId(fileDesc.getId());
+					if ((null == recips) || (0 == recips.size())) {
+						// no one hold the file, remove it
+						this.deleteFile(fileDesc);
+					}
+				}
+				return filesDesc.size();
+			}
+		}
+		return -1;
 	}
 }

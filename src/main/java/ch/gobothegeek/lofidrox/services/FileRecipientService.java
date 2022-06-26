@@ -1,6 +1,5 @@
 package ch.gobothegeek.lofidrox.services;
 
-import ch.gobothegeek.lofidrox.model.entities.FileDescriptor;
 import ch.gobothegeek.lofidrox.model.entities.FileRecipient;
 import ch.gobothegeek.lofidrox.repositories.FileDescriptorRepository;
 import ch.gobothegeek.lofidrox.repositories.FileRecipientRepository;
@@ -17,7 +16,6 @@ import java.util.Optional;
 @Transactional
 public class FileRecipientService {
 	private static final Logger logger = LoggerFactory.getLogger(FileRecipientService.class);
-	private static final String BASE64_HEADER = ";base64,";
 
 	@Inject private FileDescriptorRepository fileDescriptorRepository;
 	@Inject private FileRecipientRepository fileRecipientRepository;
@@ -38,24 +36,6 @@ public class FileRecipientService {
 		}
 		logger.error("Missing parameters to add recipients [fileId=" + (null != fileId) + "], [users=" + ((null != users) && (0 < users.length)) + "]");
 		return null;
-	}
-
-	// delete recipients of a specific file
-	@Transactional(Transactional.TxType.REQUIRED)
-	public void deleteRecipients(Integer fileId) {
-		if (null != fileId) {
-			this.fileRecipientRepository.deleteLink(fileId);
-		}
-	}
-
-	// delete recipients for a bunch of files
-	@Transactional(Transactional.TxType.REQUIRED)
-	public void deleteRecipientsForFiles(List<Integer> files) {
-		if ((null != files) && (0 < files.size())) {
-			for (Integer fileId : files) {
-				this.fileRecipientRepository.deleteLink(fileId);
-			}
-		}
 	}
 
 	// return list of files for a specific user

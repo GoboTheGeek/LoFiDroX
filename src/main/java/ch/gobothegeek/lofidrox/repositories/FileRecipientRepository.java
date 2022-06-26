@@ -22,9 +22,13 @@ public abstract class FileRecipientRepository extends LfdRepository<FileRecipien
 	@Transactional(Transactional.TxType.REQUIRED)
 	public abstract Optional<FileRecipient> findById(Integer id);
 
-	// return recipients by file id
+	// return recipients for a file
 	@Transactional(Transactional.TxType.REQUIRED)
 	public abstract List<FileRecipient> findAnyByFileId(Integer id);
+
+	// return recipient for a file and a user
+	@Transactional(Transactional.TxType.REQUIRED)
+	public abstract Optional<FileRecipient> findAnyByUserToAndFileId(String userTo, Integer id);
 
 	// create the required file
 	@Transactional(Transactional.TxType.REQUIRED)
@@ -43,15 +47,11 @@ public abstract class FileRecipientRepository extends LfdRepository<FileRecipien
 
 	// delete specified file
 	@Transactional(Transactional.TxType.REQUIRED)
-	public void deleteLink(Integer id) {
-		List<FileRecipient> recipients;
+	public void deleteLink(String user, Integer id) {
+		Optional<FileRecipient> recipient;
 
-		recipients = this.findAnyByFileId(id);
-		if ((null != recipients) && (0 < recipients.size())) {
-			for (FileRecipient rec : recipients) {
-				this.remove(rec);
-			}
-		}
+		recipient = this.findAnyByUserToAndFileId(user, id);
+		recipient.ifPresent(this::remove);
 	}
 
 	// return file for a specific id and user

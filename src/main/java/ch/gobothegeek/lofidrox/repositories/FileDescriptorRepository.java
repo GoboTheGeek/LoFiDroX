@@ -2,6 +2,7 @@ package ch.gobothegeek.lofidrox.repositories;
 
 import ch.gobothegeek.lofidrox.model.entities.FileDescriptor;
 import ch.gobothegeek.lofidrox.model.entities.FileDescriptorPK;
+import ch.gobothegeek.lofidrox.services.FileDescriptorService;
 import org.apache.deltaspike.data.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +20,14 @@ public abstract class FileDescriptorRepository extends LfdRepository<FileDescrip
 	private final Logger logger = LoggerFactory.getLogger(FileDescriptorRepository.class);
 
 	@Inject private FileRecipientRepository fileRecipientRepository;
+	@Inject private FileDescriptorService fileDescriptorService;
 
 	// return file by its name
 	@Transactional(Transactional.TxType.REQUIRED)
 	public abstract Optional<FileDescriptor> findById(Integer id);
 
 	@Transactional(Transactional.TxType.REQUIRED)
-	public abstract List<FileDescriptor> findBySourceEqualAndIdIn(String userFrom, List<Integer> ids);
+	public abstract List<FileDescriptor> findByIdIn(List<Integer> ids);
 
 	// create the required file
 	@Transactional(Transactional.TxType.REQUIRED)
@@ -58,26 +60,6 @@ public abstract class FileDescriptorRepository extends LfdRepository<FileDescrip
 		Optional<FileDescriptor> file;
 
 		file = this.findById(id);
-		if (file.isPresent()) {
-			this.fileRecipientRepository.deleteLink(id);
-			this.remove(file.get());
-		}
-	}
-
-	// delete all required files
-	@Transactional(Transactional.TxType.REQUIRED)
-	public int deleteFilesForSender(List<Integer> files, String user) {
-		List<FileDescriptor> filesDesc;
-
-		if ((null != files) && (0 < files.size()) && (null != user)) {
-			filesDesc = this.findBySourceEqualAndIdIn(user, files);
-			if (filesDesc.size() == files.size()) {
-				for (FileDescriptor fileDesc : filesDesc) {
-					this.deleteFile(fileDesc.getId());
-				}
-				return filesDesc.size();
-			}
-		}
-		return -1;
+		file.ifPresent(this::remove);
 	}
 }
