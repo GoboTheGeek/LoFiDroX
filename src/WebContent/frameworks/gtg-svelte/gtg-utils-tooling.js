@@ -46,6 +46,13 @@ class GtgUtilsTools {
     static getLocalValue(key) {
         return window.localStorage.getItem(key);
     };
+
+    // return an array containing { fieldname: error message }
+    static turnYupErrorsToArray(errors) {
+        return errors.inner.reduce((field, error) => {
+            return { ...field, [error.path]: error.message };
+        }, {});
+    };
 };
 
 if (typeof JSON.decycle !== "function") {
@@ -134,4 +141,3 @@ if (typeof JSON.retrocycle !== "function") {
 export default GtgUtilsTools;
 
 console.log('done gtg-utils-tooling.js');
-
