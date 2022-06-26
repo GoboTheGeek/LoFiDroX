@@ -88,7 +88,7 @@ public class FileController {
 		return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
 	}
 
-	// delete the specified file. The file must be owned by user calling this url
+	// delete the specified file. User calling this url must be recipeient these files
 	@DELETE
 	@Path("/delete")
 	@Consumes(MediaType.APPLICATION_JSON)
